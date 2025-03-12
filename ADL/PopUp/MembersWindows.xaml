@@ -1,0 +1,75 @@
+﻿<Window
+    x:Class="ADL.PopUp.MembersWindows"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:ADL.PopUp"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid>
+        <Image Source="Assets/blue.png" Stretch="UniformToFill" Opacity="0.1" />
+        <Rectangle HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Fill="{StaticResource AppBack}"/>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <InfoBar x:Name="WarningMessage" Title="Search result" Severity="Warning" IsOpen="False" Grid.Row="0" />
+            <StackPanel Grid.Row="1" Orientation="Horizontal" Padding="2,10">
+                <PersonPicture x:Name="UserPicture" Width="35" Height="35" Margin="10" ProfilePicture="/Assets/ADL.png"/>
+                <TextBlock x:Name="TitleText" FontWeight="ExtraBold" FontSize="25" Text="Active Directory Light" Margin="10"/>
+            </StackPanel>
+
+            <ScrollViewer Grid.Row="2" Margin="10,0">
+                <ListView x:Name="DeviceListView" VerticalAlignment="Stretch">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Grid.ColumnDefinitions="Auto,*" PointerEntered="Grid_PointerEntered" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                                <Grid.ContextFlyout>
+                                    <MenuFlyout Placement="Bottom">
+                                        <MenuFlyoutItem x:Name="Remove" Text="Remove" Click="ContextMenuItem_Click">
+                                            <MenuFlyoutItem.Icon>
+                                                <FontIcon Glyph="&#xE74D;" />
+                                            </MenuFlyoutItem.Icon>
+                                        </MenuFlyoutItem>
+                                    </MenuFlyout>
+                                </Grid.ContextFlyout>
+                                <FontIcon Glyph="{Binding TypeIcon}" Foreground="{Binding TypeColor}" FontSize="20" Margin="10"/>
+                                <StackPanel Margin="0,10" Grid.Column="1">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding Path}"/>
+                                </StackPanel>
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </ScrollViewer>
+            <Grid Grid.Row="3" Padding="5" Margin="10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBox x:Name="SearchText" PlaceholderText="Name of the resource to add" Grid.Column="0" Margin="5,0" TextChanged="TextBox_TextChanged"/>
+                <Button x:Name="CheckName" Grid.Column="1" Margin="5,0" Click="CheckName_Click">
+                    <StackPanel Orientation="Horizontal">
+                        <FontIcon Glyph="&#xE73E;" />
+                        <TextBlock Text="Check Name" Margin="10,0"/>
+                    </StackPanel>
+                </Button>
+                <Button x:Name="AddTo" Grid.Column="2" Margin="5,0" IsEnabled="False" Click="AddTo_Click">
+                    <StackPanel Orientation="Horizontal">
+                        <FontIcon Glyph="&#xECC8;" />
+                        <TextBlock Text="Add to group" Margin="10,0"/>
+                    </StackPanel>
+                    
+                </Button>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>

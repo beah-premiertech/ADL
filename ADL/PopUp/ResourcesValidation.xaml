@@ -1,0 +1,33 @@
+﻿<ContentDialog
+    x:Class="ADL.PopUp.ResourcesValidation"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:ADL.PopUp"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="TITLE"
+    Style="{ThemeResource DefaultContentDialogStyle}"
+    PrimaryButtonText="Cancel"
+    SecondaryButtonText="Ok"
+    IsSecondaryButtonEnabled="False"
+    PrimaryButtonClick="ContentDialog_PrimaryButtonClick"
+    SecondaryButtonClick="ContentDialog_SecondaryButtonClick">
+	<Grid>
+        <ScrollViewer Margin="10,0">
+            <ListView x:Name="DeviceListView" VerticalAlignment="Stretch" SelectionChanged="DeviceListView_SelectionChanged">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Grid.ColumnDefinitions="Auto,*"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                            <FontIcon Glyph="{Binding TypeIcon}" Foreground="{Binding TypeColor}" FontSize="20" Margin="10"/>
+                            <StackPanel Margin="0,10" Grid.Column="1">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+                                </StackPanel>
+                                <TextBlock Text="{Binding Path}"/>
+                            </StackPanel>
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </ScrollViewer>
+    </Grid>
+</ContentDialog>

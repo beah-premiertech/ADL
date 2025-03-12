@@ -1,0 +1,173 @@
+﻿<Page x:Class="ADL.MainPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:local="using:ADL"
+      xmlns:utu="using:Uno.Toolkit.UI"
+      Loaded="Page_Loaded">
+
+    <Grid>
+        <!-- Background Image -->
+        <Image Source="Assets/blue.png" Stretch="UniformToFill" Opacity="0.1" />
+        <Rectangle HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Fill="{StaticResource AppBack}"/>
+        
+        <!-- Content Layer -->
+        <Grid>
+            <ProgressRing x:Name="ProgRing" IsActive="True" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Width="180" Height="180" />
+            <Grid x:Name="MainGrid" RowDefinitions="Auto,Auto,Auto,*" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                <InfoBar x:Name="WarningMessage" Title="Search result" Severity="Warning" IsOpen="False" />
+                <StackPanel Grid.Row="1" Orientation="Horizontal" Padding="2,5">
+                    <PersonPicture x:Name="UserPicture" Width="35" Height="35" Margin="10,5" ProfilePicture="/Assets/ADL.png"/>
+                    <TextBlock FontWeight="ExtraBold" FontSize="25" Text="Active Directory Light" Margin="5"/>
+                </StackPanel>
+                <StackPanel Grid.Row="2">
+                    <Grid Grid.ColumnDefinitions="*,Auto">
+                        <TextBox x:Name="SearchBox" Margin="10,15" PlaceholderText="Search" KeyDown="TextBox_KeyDown" />
+                        <Button x:Name="SearchBt" Margin="10" Grid.Column="1" Click="Search_Click">
+                            <FontIcon Glyph="&#xE721;" />
+                        </Button>
+                    </Grid>
+                    <StackPanel Margin="10,0" Orientation="Horizontal">
+                        <ToggleSplitButton x:Name="SortOrderBt"  Margin="5,28" IsCheckedChanged="SortOrderBt_IsCheckedChanged" Tag="A">
+                            <ToggleSplitButton.Flyout>
+                                <MenuFlyout Placement="Bottom">
+                                    <MenuFlyoutItem x:Name="AscendBt" Text="Ascending" Click="AscendBt_Click">
+                                        <MenuFlyoutItem.Icon>
+                                            <FontIcon Glyph="&#xE74A;" />
+                                        </MenuFlyoutItem.Icon>
+                                    </MenuFlyoutItem>
+                                    <MenuFlyoutItem x:Name="DescendBt" Text="Descending" Click="DescendBt_Click">
+                                        <MenuFlyoutItem.Icon>
+                                            <FontIcon Glyph="&#xE74B;" />
+                                        </MenuFlyoutItem.Icon>
+                                    </MenuFlyoutItem>
+                                </MenuFlyout>
+                            </ToggleSplitButton.Flyout>
+                            <ToggleSplitButton.Content>
+                                <FontIcon Glyph="&#xE8CB;" />
+                            </ToggleSplitButton.Content>
+                        </ToggleSplitButton>
+                        <ComboBox x:Name="SearchBy" MinWidth="160" Header="Search by:" Margin="5,0" SelectedIndex="0" SelectionChanged="SearchBy_SelectionChanged">
+                            <x:String>Object Name</x:String>
+                            <x:String>Object Path</x:String>
+                            <x:String>DistinguishedName</x:String>
+                        </ComboBox>
+                        <ComboBox x:Name="TypeFilter" MinWidth="160" Header="Filter on type:" Margin="5,0" SelectedIndex="0" SelectionChanged="TypeFilter_SelectionChanged">
+                            <x:String>All Type</x:String>
+                            <x:String>Devices</x:String>
+                            <x:String>Users</x:String>
+                            <x:String>Groups</x:String>
+                        </ComboBox>
+                        <ComboBox x:Name="StatusFilter" MinWidth="160" Header="Filter on status:" Margin="5,0" SelectedIndex="0" SelectionChanged="StatusFilter_SelectionChanged">
+                            <x:String>All Status</x:String>
+                            <x:String>Enabled</x:String>
+                            <x:String>Disabled</x:String>
+                        </ComboBox>
+                        <ComboBox x:Name="DomainFilter" MinWidth="160" Header="Filter on domain:" Margin="5,0" SelectedIndex="0" SelectionChanged="DomainFilter_SelectionChanged">
+                            <x:String>All Domains</x:String>
+                            <x:String>na.premiertech.com</x:String>
+                            <x:String>eu.premiertech.com</x:String>
+                            <x:String>as.premiertech.com</x:String>
+                        </ComboBox>
+                        <Button Margin="10,0" HorizontalAlignment="Right" x:Name="Refresh" Click="Refresh_Click">
+                            <FontIcon Glyph="&#xE72C;" />
+                        </Button>
+                    </StackPanel>
+                    <Grid Margin="10" BorderThickness="1"/>
+                </StackPanel>
+                <SplitView x:Name="SplPane" Grid.Row="3" DisplayMode="CompactInline" IsPaneOpen="True" CompactPaneLength="66" OpenPaneLength="272" PaneBackground="Transparent">
+                    <SplitView.Pane>
+                        <Grid HorizontalAlignment="Stretch" Padding="2">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <TreeView x:Name="NavigationTree" Grid.Row="0" Margin="5,0" ItemInvoked="NavigationTree_ItemInvoked">
+                                <TreeView.ItemTemplate>
+                                    <DataTemplate x:DataType="local:AdOu">
+                                        <TreeViewItem ItemsSource="{x:Bind Children}">
+                                            <TreeViewItem.ContextFlyout>
+                                                <MenuFlyout>
+                                                    <MenuFlyoutItem x:Name="Fav" Text="{x:Bind TypeColor}" Visibility="{x:Bind Type}" Click="Fav_Click">
+                                                        <MenuFlyoutItem.Icon >
+                                                            <FontIcon Glyph="{x:Bind Tag}"/>
+                                                        </MenuFlyoutItem.Icon>
+                                                    </MenuFlyoutItem>
+                                                </MenuFlyout>
+                                            </TreeViewItem.ContextFlyout>
+                                            <StackPanel Orientation="Horizontal">
+                                                <FontIcon Glyph="{x:Bind TypeIcon}" />
+                                                <TextBlock Margin="0,0,10,0"/>
+                                                <TextBlock Text="{x:Bind Name}"/>
+                                            </StackPanel>
+                                        </TreeViewItem>
+                                    </DataTemplate>
+                                </TreeView.ItemTemplate>
+                            </TreeView>
+                            <ToggleButton x:Name="NavToggle" Margin="10" IsChecked="True" HorizontalAlignment="Left" Click="NavToggle_Click" Grid.Row="1">
+                                <FontIcon Glyph="&#xEE49;" />
+                            </ToggleButton>
+                        </Grid>
+                    </SplitView.Pane>
+                    <ScrollViewer Margin="10,0">
+                        <ListView x:Name="DeviceListView" VerticalAlignment="Stretch">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Grid.ColumnDefinitions="Auto,*" PointerEntered="Grid_PointerEntered" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                                        <Grid.ContextFlyout>
+                                            <MenuFlyout Placement="Bottom">
+                                                <MenuFlyoutItem x:Name="CopyName" Text="Copy name" Click="ContextMenuItem_Click">
+                                                    <MenuFlyoutItem.Icon>
+                                                        <FontIcon Glyph="&#xE8C8;" />
+                                                    </MenuFlyoutItem.Icon>
+                                                </MenuFlyoutItem>
+                                                <MenuFlyoutItem x:Name="CopyPath" Text="Copy path" Click="ContextMenuItem_Click">
+                                                    <MenuFlyoutItem.Icon>
+                                                        <FontIcon Glyph="&#xE8C8;" />
+                                                    </MenuFlyoutItem.Icon>
+                                                </MenuFlyoutItem>
+                                                <MenuFlyoutItem x:Name="CopyFullPath" Text="Copy DistinguishedName" Click="ContextMenuItem_Click">
+                                                    <MenuFlyoutItem.Icon>
+                                                        <FontIcon Glyph="&#xE8C8;" />
+                                                    </MenuFlyoutItem.Icon>
+                                                </MenuFlyoutItem>
+                                                <MenuFlyoutItem x:Name="EnableDisable" Text="{Binding EnableText}" Visibility="{Binding EnableVisibility}" Click="ContextMenuItem_Click">
+                                                    <MenuFlyoutItem.Icon>
+                                                        <FontIcon Glyph="{Binding EnableIcon}" />
+                                                    </MenuFlyoutItem.Icon>
+                                                </MenuFlyoutItem>
+                                                <MenuFlyoutItem x:Name="ResetPassword" Text="Reset password" Visibility="{Binding ResetPasswordVisibility}" IsEnabled="False" Click="ContextMenuItem_Click">
+                                                    <MenuFlyoutItem.Icon>
+                                                        <FontIcon Glyph="&#xE755;" />
+                                                    </MenuFlyoutItem.Icon>
+                                                </MenuFlyoutItem>
+                                                <MenuFlyoutItem x:Name="Delete" Text="Delete" Visibility="{Binding DeleteVisibility}" Click="ContextMenuItem_Click">
+                                                    <MenuFlyoutItem.Icon>
+                                                        <FontIcon Glyph="&#xE74D;" />
+                                                    </MenuFlyoutItem.Icon>
+                                                </MenuFlyoutItem>
+                                                <MenuFlyoutItem x:Name="Members" Text="Members" Visibility="{Binding MembersVisibility}" Click="ContextMenuItem_Click">
+                                                    <MenuFlyoutItem.Icon>
+                                                        <FontIcon Glyph="&#xE74D;" />
+                                                    </MenuFlyoutItem.Icon>
+                                                </MenuFlyoutItem>
+                                            </MenuFlyout>
+                                        </Grid.ContextFlyout>
+                                        <FontIcon Glyph="{Binding TypeIcon}" Foreground="{Binding TypeColor}" FontSize="20" Margin="10"/>
+                                        <StackPanel Margin="0,10" Grid.Column="1">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+                                                <FontIcon Visibility="{Binding EnableVisibility}" Glyph="{Binding IsEnableIcon}" Foreground="{Binding IsEnableColor}" Margin="5,0"/>
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding Path}"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </ScrollViewer>
+                </SplitView>
+            </Grid>
+        </Grid>
+    </Grid>
+</Page>

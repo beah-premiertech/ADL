@@ -1,0 +1,18 @@
+﻿<ContentDialog
+    x:Class="ADL.PopUp.ActionConfirmation"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:ADL.PopUp"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Style="{ThemeResource DefaultContentDialogStyle}"
+    PrimaryButtonText="No"
+    SecondaryButtonText="Yes"
+    PrimaryButtonClick="ContentDialog_PrimaryButtonClick"
+    SecondaryButtonClick="ContentDialog_SecondaryButtonClick">
+    <Grid>
+        <StackPanel Margin="0,0,0,0" Orientation="Horizontal">
+            <FontIcon x:Name="Icon" FontSize="30" Glyph="&#xE74D;"/>
+            <TextBlock x:Name="ConfirmationMessasge" FontSize="22"  Margin="10,10,0,0"/>
+        </StackPanel>
+    </Grid>
+</ContentDialog>
