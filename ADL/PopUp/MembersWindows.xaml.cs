@@ -53,12 +53,16 @@ public sealed partial class MembersWindows : Window
                 case "Remove":
                     if (WorkItem != null)
                     {
+                        SearchText.Text = string.Empty;
+                        AddTo.IsEnabled = false;
+
                         var Confirmation = new ActionConfirmation($"Do you want to remove {WorkItem.Name} from {Group.Name}", "\uE74D");
                         Confirmation.XamlRoot = this.Content.XamlRoot;
                         if (await Confirmation.ShowAsync() == ContentDialogResult.Secondary)
                         {
                             AdAction.AddRemoveMembers(DomainUser, Password, Group, WorkItem.FullPath, true);
                             DeviceListView.ItemsSource = AdAction.Members(DomainUser, Password, Group);
+                            WorkItem = null;
                         }
                     }
                     break;
@@ -99,12 +103,14 @@ public sealed partial class MembersWindows : Window
     {
         if (WorkItem != null)
         {
-            var Confirmation = new ActionConfirmation($"Do you want to add {WorkItem.Name} to {Group.Name}", "\uE74D");
+            var Confirmation = new ActionConfirmation($"Do you want to add {WorkItem.Name} to {Group.Name}", "\uECC8");
             Confirmation.XamlRoot = this.Content.XamlRoot;
             if (await Confirmation.ShowAsync() == ContentDialogResult.Secondary)
             {
                 AdAction.AddRemoveMembers(DomainUser, Password, Group, WorkItem.FullPath);
                 DeviceListView.ItemsSource = AdAction.Members(DomainUser, Password, Group);
+                SearchText.Text = string.Empty;
+                AddTo.IsEnabled = false;
             }
         }
     }

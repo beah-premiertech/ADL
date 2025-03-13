@@ -40,11 +40,12 @@
       Mvvm;
       ThemeService;
     </UnoFeatures>
-    <AssemblyVersion>25.3.12.39</AssemblyVersion>
-    <FileVersion>25.3.12.39</FileVersion>
+    <AssemblyVersion>25.3.13.52</AssemblyVersion>
+    <FileVersion>25.3.13.52</FileVersion>
     <PackageCertificateThumbprint>5667DBD5F699C0F4A08C2B88D98FE54DE6642E5E</PackageCertificateThumbprint>
     <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
     <Platforms>AnyCPU;x64</Platforms>
+    <ApplicationIcon>Assets\ADL.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Content Remove="Assets\blue.png" />

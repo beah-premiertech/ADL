@@ -19,9 +19,9 @@ public static class AdDataCollections
     public static List<AdOu> AdOus = new List<AdOu>();
 
     private static List<AdBaseObject> AdRawOus = new List<AdBaseObject>();
-    private static List<Collection<PSObject>> DevicesResult = new List<Collection<PSObject>>();
-    private static List<Collection<PSObject>> UsersResult = new List<Collection<PSObject>>();
-    private static List<Collection<PSObject>> GroupsResult = new List<Collection<PSObject>>();
+    private static List<Collection<PSObject>> DevicesResult { get; } = new List<Collection<PSObject>>();
+    private static List<Collection<PSObject>> UsersResult { get; } = new List<Collection<PSObject>>();
+    private static List<Collection<PSObject>> GroupsResult { get; } = new List<Collection<PSObject>>();
 
     #region Get data
     public static void GetDomains()
@@ -40,20 +40,22 @@ public static class AdDataCollections
                 return;
             }
 
-            ps.Commands.Clear();
-            ps.AddCommand("Get-ADForest");
-
-
-            var results = ps.Invoke();
-            foreach (var result in results)
+            if (Domains == null || Domains.Length < 1)
             {
-                if (result.Properties["Domains"]?.Value is IEnumerable domains)
+                ps.Commands.Clear();
+                ps.AddCommand("Get-ADForest");
+
+
+                var results = ps.Invoke();
+                foreach (var result in results)
                 {
-                    Domains = domains.Cast<string>().ToArray();
-                    break;
+                    if (result.Properties["Domains"]?.Value is IEnumerable domains)
+                    {
+                        Domains = domains.Cast<string>().ToArray();
+                        break;
+                    }
                 }
             }
-
             foreach (var Domain in Domains)
             {
                 ps.Commands.Clear();
@@ -73,16 +75,11 @@ public static class AdDataCollections
                 }
             }
 
-            if (ps.HadErrors)
-            {
-                foreach (var error in ps.Streams.Error)
-                {
-                    Debug.WriteLine($"Error executing PowerShell command: {error}");
-                }
-            }
         }
+
     }
-    public static async Task GetAllDataAsync(string UserDomain, string Password)
+
+    public static async void GetAllData(string UserDomain, string Password)
     {
         ReadyCount = 0;
         AdObjects.Clear();
@@ -177,7 +174,7 @@ public static class AdDataCollections
                 {
                     ps.Commands.Clear();
                     ps.AddCommand("Get-ADUser")
-                      .AddParameter("Filter", "DistinguishedName -notlike \"Domain Control\"")
+                      .AddParameter("Filter", "*")
                       .AddParameter("Server", Domain)
                       .AddParameter("Credential", credentials);
 
@@ -223,7 +220,7 @@ public static class AdDataCollections
                 {
                     ps.Commands.Clear();
                     ps.AddCommand("Get-ADGroup")
-                  .AddParameter("Filter", "DistinguishedName -notlike \"Domain Control\"")
+                  .AddParameter("Filter", "*")
                   .AddParameter("Server", Domain)
                   .AddParameter("Credential", credentials);
 
@@ -247,8 +244,6 @@ public static class AdDataCollections
     }
     private static async Task GetAllOus(string UserDomain, string Password)
     {
-        AdRawOus.Clear();
-        AdOus.Clear();
         AdOU = new AdOu { Name = "All", Domain = "All", FullPath = "All", Path = "All", TypeIcon = "\uE8A9", Type = "Collapsed" };
 
         try
@@ -283,18 +278,14 @@ public static class AdDataCollections
                     foreach (var result in results)
                     {
                         var AdName = result.Properties["Name"]?.Value?.ToString();
-                        var PartialFormating = result.Properties["DistinguishedName"]?.Value?.ToString().Replace(",", @"\").Replace("CN=", string.Empty).Substring(AdName.Length + 1).Replace("OU=", string.Empty);
-                        var RawDomain = PartialFormating.Replace(PartialFormating.Split(@"\DC=").First(), string.Empty);
-                        RawDomain = RawDomain.Substring(4);
-                        PartialFormating = PartialFormating.Split(@"\DC=").First();
-                        var FormatedPath = $@"{PartialFormating}\{RawDomain.Replace(@"\DC=", ".")}";
+                        var FormatedPath = AdCommon.FormatPath(result.Properties["DistinguishedName"]?.Value?.ToString(), AdName);
 
                         var ou = new AdBaseObject
                         {
                             Name = AdName,
                             Path = FormatedPath,
                             Type = "Visible",
-                            Domain = FormatedPath.Split('\\').Last(),
+                            Domain = FormatedPath.Split('\\').First(),
                             FullPath = result.Properties["DistinguishedName"]?.Value?.ToString(),
                             Tag = "\uE710",
                             TypeIcon = "\uE8B7",
@@ -332,13 +323,13 @@ public static class AdDataCollections
                 foreach (var result in results)
                 {
                     var AdName = result.Properties["Name"]?.Value?.ToString();
-                    var FormatedPath = AdCommon.FormatPath(result.Properties["DistinguishedName"]?.Value?.ToString(),AdName);
+                    var FormatedPath = AdCommon.FormatPath(result.Properties["DistinguishedName"]?.Value?.ToString(), AdName);
 
                     var device = new AdObject
                     {
                         Name = AdName,
                         Path = FormatedPath,
-                        Domain = FormatedPath.Split('\\').Last(),
+                        Domain = FormatedPath.Split('\\').First(),
                         Type = "Device",
                         TypeIcon = "\uEA6C",
                         DeleteVisibility = "Visible",
@@ -366,13 +357,13 @@ public static class AdDataCollections
                 foreach (var result in results)
                 {
                     var AdName = result.Properties["Name"]?.Value?.ToString();
-                    var FormatedPath = AdCommon.FormatPath(result.Properties["DistinguishedName"]?.Value?.ToString(),AdName);
+                    var FormatedPath = AdCommon.FormatPath(result.Properties["DistinguishedName"]?.Value?.ToString(), AdName);
 
                     var user = new AdObject
                     {
                         Name = AdName,
                         Path = FormatedPath,
-                        Domain = FormatedPath.Split('\\').Last(),
+                        Domain = FormatedPath.Split('\\').First(),
                         Type = "User",
                         TypeIcon = "\uE77B",
                         TypeColor = "#29ab85",
@@ -403,21 +394,18 @@ public static class AdDataCollections
                     var AdName = result.Properties["Name"]?.Value?.ToString();
                     var FormatedPath = AdCommon.FormatPath(result.Properties["DistinguishedName"]?.Value?.ToString(),AdName);
 
-                    var group = new AdObject
+                    var ou = new AdBaseObject
                     {
                         Name = AdName,
                         Path = FormatedPath,
-                        Domain = FormatedPath.Split('\\').Last(),
-                        Type = "Group",
-                        TypeIcon = "\uE902",
-                        TypeColor = "#9250eb",
-                        DeleteVisibility = "Collapsed",
-                        ResetPasswordVisibility = "Collapsed",
-                        MembersVisibility = "Visible",
-                        CanBeEnable = false,
-                        FullPath = result.Properties["DistinguishedName"]?.Value?.ToString()
+                        Type = "Visible",
+                        Domain = FormatedPath.Split('\\').First(),
+                        FullPath = result.Properties["DistinguishedName"]?.Value?.ToString(),
+                        Tag = "\uE710",
+                        TypeIcon = "\uE8B7",
+                        TypeColor = "Add to favorites"
                     };
-                    AdObjects.Add(group);
+                    AdRawOus.Add(ou);
                 }
                 ReadyCount++;
                 TriguerReadyEvent();
@@ -427,7 +415,7 @@ public static class AdDataCollections
     }
     private static void GetAllOus()
     {
-        foreach (var ou in AdRawOus)
+        foreach (var ou in AdRawOus.OrderBy(ad => ad.Path?.Length ?? 0).ToList())
         {
             var AdOu = new AdOu
             {
@@ -443,8 +431,8 @@ public static class AdDataCollections
             var Parent = AdOU.Children.Find(x => x.Domain.ToLower().Replace(" ", string.Empty) == ou.Domain.ToLower().Replace(" ", string.Empty));
             if (Parent != null)
             {
-                var NoDomainPath = ou.Path.Replace(ou.Domain, string.Empty).TrimEnd('\\');
-                var PathArray = NoDomainPath.Split(@"\").Reverse().ToArray();
+                var NoDomainPath = ou.Path.Replace(ou.Domain, string.Empty).TrimStart('\\');
+                var PathArray = NoDomainPath.Split(@"\").ToArray();
                 AppendOu(Parent, PathArray, AdOu);
             }
         }
@@ -456,27 +444,51 @@ public static class AdDataCollections
     #endregion
 
     #region Data management and event handlers
-    private static void AppendOu(AdOu Parent, string[] PathArray, AdOu AdOu)
+    private static void AppendOu(AdOu parent, string[] pathArray, AdOu adOuToAdd)
     {
-        if (PathArray.Length == 1)
+        if (pathArray.Length == 0)
+            return;
+
+        var currentNodeName = pathArray[0];
+
+        // Find or create the child
+        var child = parent.Children.FirstOrDefault(c => c.Name.Equals(currentNodeName, StringComparison.OrdinalIgnoreCase));
+        if (child == null)
         {
-            Parent.Children.Add(AdOu);
+            // Dynamically create the missing parent node
+            var path = $"{currentNodeName}\\{parent.Path}";
+            child = new AdOu
+            {
+                Name = currentNodeName,
+                Path = path,
+                Domain = parent.Domain,
+                FullPath = $"OU={path.Replace("\\",",OU=")},DC={parent.Domain.Replace(".",",DC=")}".Replace($"{parent.Domain},",string.Empty).Replace(",OU=DC=",",DC="),
+                TypeIcon = "\uE8B7",
+                Type = "Visible",
+                TypeColor = "Add to favorites",
+                Tag = "\uE710"
+            };
+            if (child.Name.Length > 2)
+            {
+                parent.Children.Add(child);
+            }
+        }
+
+        // Recursively process the remaining path
+        if (pathArray.Length > 1)
+        {
+            AppendOu(child, pathArray.Skip(1).ToArray(), adOuToAdd);
         }
         else
         {
-            var Child = Parent.Children.Find(x => x.Name == PathArray[0]);
-            if (Child == null)
-            {
-                Child = new AdOu { Name = PathArray[0] };
-                Parent.Children.Add(Child);
-            }
-            var NextOu = PathArray.Skip(1).ToArray();
-            AppendOu(Child, NextOu, AdOu);
+            // Add the final OU to the child
+            child.Children.Add(adOuToAdd);
         }
     }
+
     private static void TriguerReadyEvent()
     {
-        if (ReadyCount >= (Domains.Length - 1) * 3)
+        if (ReadyCount >= (Domains.Length) * 3)
         {
             ReadyCount = 0;
             OnReady?.Invoke(null, EventArgs.Empty);

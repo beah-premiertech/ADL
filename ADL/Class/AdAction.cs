@@ -167,9 +167,9 @@ public static class AdAction
             ps.Commands.Clear();
             ps.AddCommand("New-ADComputer")
               .AddParameter("Name", DeviceName)
-              .AddParameter ("SamAccountName", DeviceName)
+              .AddParameter("SamAccountName", DeviceName)
               .AddParameter("Path", DevicePath)
-              .AddParameter("OperatingSystem","Windows")
+              .AddParameter("OperatingSystem", "Windows")
               .AddParameter("Server", Domain)
               .AddParameter("Confirm", false)
               .AddParameter("Credential", credentials)
@@ -299,7 +299,7 @@ public static class AdAction
             Debug.WriteLine($"Exception in GetAllDevices: {ex.Message}");
         }
     }
-    public static List<AdBaseObject> Members(string UserDomain, string Password, AdObject Object)
+    public static List<AdBaseObject> Members(string UserDomain, string Password, AdObject Group)
     {
         List<AdBaseObject> Members = new List<AdBaseObject>();
         try
@@ -322,37 +322,38 @@ public static class AdAction
 
 
                 ps.Commands.Clear();
+                Debug.WriteLine(Group.FullPath);
                 ps.AddCommand("Get-ADGroupMember")
-                  .AddParameter("Identity", Object.FullPath)
-                  .AddParameter("Server", Object.Domain)
+                  .AddParameter("Identity", Group.FullPath)
+                  .AddParameter("Server", Group.Domain)
                   .AddParameter("Credential", credentials);
 
-                var results = ps.Invoke();
-
-                foreach (var result in results)
+                try
                 {
-                    var AdName = result.Properties["Name"]?.Value?.ToString();
-                    var PartialFormating = result.Properties["DistinguishedName"]?.Value?.ToString().Replace(",", @"\").Replace("CN=", string.Empty).Substring(AdName.Length + 1).Replace("OU=", string.Empty);
-                    var RawDomain = PartialFormating.Replace(PartialFormating.Split(@"\DC=").First(), string.Empty);
-                    RawDomain = RawDomain.Substring(4);
-                    PartialFormating = PartialFormating.Split(@"\DC=").First();
-                    var FormatedPath = $@"{PartialFormating}\{RawDomain.Replace(@"\DC=", ".")}";
+                    var results = ps.Invoke();
 
-                    var device = new AdBaseObject
+                    foreach (var result in results)
                     {
-                        Name = AdName,
-                        Type = result.Properties["objectClass"]?.Value?.ToString(),
-                        Path = FormatedPath,
-                        Domain = FormatedPath.Split('\\').Last(),
-                        FullPath = result.Properties["DistinguishedName"]?.Value?.ToString()
-                    };
-                    if (device.Type == "user")
-                    { device.TypeIcon = "\uE77B"; device.TypeColor = "#29ab85"; }
-                    else
-                    { device.TypeIcon = "\uEA6C"; device.TypeColor = "#158fd7"; }
+                        var AdName = result.Properties["Name"]?.Value?.ToString();
+                        var FormatedPath = AdCommon.FormatPath(result.Properties["DistinguishedName"]?.Value?.ToString(),AdName);
 
-                    Members.Add(device);
+                        var device = new AdBaseObject
+                        {
+                            Name = AdName,
+                            Type = result.Properties["objectClass"]?.Value?.ToString(),
+                            Path = FormatedPath,
+                            Domain = FormatedPath.Split('\\').First(),
+                            FullPath = result.Properties["DistinguishedName"]?.Value?.ToString()
+                        };
+                        if (device.Type == "user")
+                        { device.TypeIcon = "\uE77B"; device.TypeColor = "#29ab85"; }
+                        else
+                        { device.TypeIcon = "\uEA6C"; device.TypeColor = "#158fd7"; }
+
+                        Members.Add(device);
+                    }
                 }
+                catch (Exception ex) { Debug.WriteLine(ex.Message); }
 
                 if (ps.HadErrors)
                 {

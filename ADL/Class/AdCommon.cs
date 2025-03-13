@@ -20,8 +20,14 @@ namespace ADL.Class
             var RawDomain = PartialFormating.Replace(PartialFormating.Split(@"\DC=").First(), string.Empty);
             RawDomain = RawDomain.Substring(4);
             PartialFormating = PartialFormating.Split(@"\DC=").First();
-            var FormatedPath = $@"{PartialFormating}\{RawDomain.Replace(@"\DC=", ".")}";
-            return FormatedPath;
+            var ArrayPath = $@"{PartialFormating}\{RawDomain.Replace(@"\DC=", ".")}".Split('\\');
+            string FinalPath = string.Empty;
+            foreach (var Part in ArrayPath.Reverse())
+            {
+                FinalPath += $"\\{Part}";
+            }
+
+            return FinalPath.Substring(1);
         }
     }
 }

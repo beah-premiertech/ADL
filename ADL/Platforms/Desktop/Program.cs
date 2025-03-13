@@ -7,7 +7,7 @@ public class Program
     public static void Main(string[] args)
     {
         var host = SkiaHostBuilder.Create()
-            .App(() => new App())
+            .App(() => new App(args))
             .UseX11()
             .UseLinuxFrameBuffer()
             .UseMacOS()

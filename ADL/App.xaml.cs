@@ -7,10 +7,12 @@ public partial class App : Application
     /// Initializes the singleton application object. This is the first line of authored code
     /// executed, and as such is the logical equivalent of main() or WinMain().
     /// </summary>
-    public App()
+    public App(string[] args)
     {
         this.InitializeComponent();
+        LaunchArguments = args;
     }
+    public static string[]? LaunchArguments { get; set; } = null;
 
     public static Window? MainWindow { get; private set; }
     protected IHost? Host { get; private set; }

@@ -20,7 +20,13 @@ public sealed partial class MainPage : Page
     #region Data mangagement and filtering
     private async void Page_Loaded(object sender, RoutedEventArgs e)
     {
+        App.LaunchArguments = new string[] { "na.premiertech.com" };
+        if (App.LaunchArguments != null && App.LaunchArguments.Length > 0)
+        {
+            AdDataCollections.Domains = App.LaunchArguments;
+        }
         AdDataCollections.GetDomains();
+
         // Await the asynchronous method call
         AdDataCollections.OnReady += (s, e) =>
         {
@@ -95,7 +101,7 @@ public sealed partial class MainPage : Page
         Refresh.IsEnabled = false;
         ProgRing.Visibility = Visibility.Visible;
         MainGrid.Visibility = Visibility.Collapsed;
-        new Thread(() => AdDataCollections.GetAllDataAsync(DomainUser, Password)).Start();
+        new Thread(() => AdDataCollections.GetAllData(DomainUser, Password)).Start();
     }
     private void Search(bool ShowWarning = false)
     {
@@ -404,6 +410,7 @@ public sealed partial class MainPage : Page
             }
             else
             {
+                Debug.WriteLine($"NAME={OU.Name} PATH={OU.Path} FULLPATH={OU.FullPath}");
                 DomainFilter.IsEnabled = false;
                 DomainFilter.SelectedIndex = 0;
                 SearchBy.IsEnabled = false;
