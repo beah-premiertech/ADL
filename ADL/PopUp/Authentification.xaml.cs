@@ -19,13 +19,13 @@ namespace ADL
 {
     public sealed partial class Authentification : ContentDialog
     {
-        private ApplicationDataContainer LocalSettings;
+        private ApplicationDataContainer? LocalSettings;
         private const string UserDomainKey = "UserDomain";
         public InfoBarSeverity Severity { get; set; }
-        public string UserTitle { get; set; }
-        public string Message { get; set; }
+        public string? UserTitle { get; set; }
+        public string? Message { get; set; }
 
-        public Authentification(InfoBarSeverity s = InfoBarSeverity.Informational, string t = null, string m = null)
+        public Authentification(InfoBarSeverity s = InfoBarSeverity.Informational, string? t = null, string? m = null)
         {
             this.InitializeComponent();
             Domain.ItemsSource = AdManager.NtDomains;
@@ -67,17 +67,16 @@ namespace ADL
         {
             if (Domain.SelectedValue is AdNtDomain NTdomain)
             {
-                var UserDomain = $@"{NTdomain.Domain}\{User.Text}";
-                if (ValidateDomainCredentials(UserDomain, Pwd.Password))
+                if (ValidateCredentials(NTdomain.Domain, User.Text, Pwd.Password))
                 {
-                    UserTitle = UserDomain;
+                    UserTitle = $@"{NTdomain.NTDomain}\{User.Text}";
                     Message = Pwd.Password;
                     Severity = InfoBarSeverity.Success;
-                    SaveUserDomain(UserDomain);
+                    SaveUserDomain(UserTitle);
                 }
                 else
                 {
-                    UserTitle = UserDomain;
+                    UserTitle = $@"{NTdomain.NTDomain}\{User.Text}";
                     Message = $"Password is not valid";
                     Severity = InfoBarSeverity.Error;
                 }
@@ -106,14 +105,12 @@ namespace ADL
             }
         }
 
-        public static bool ValidateDomainCredentials(string username, string password)
+        static bool ValidateCredentials(string domain, string username, string password)
         {
-            var isValid = false;
-            using (var context = new PrincipalContext(ContextType.Domain))
+            using (var context = new PrincipalContext(ContextType.Domain, domain))
             {
-                isValid = context.ValidateCredentials(username, password);
+                return context.ValidateCredentials(username, password);
             }
-            return isValid;
         }
 
         private void SaveUserDomain(string userDomain)

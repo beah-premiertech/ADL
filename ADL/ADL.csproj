@@ -114,6 +114,7 @@
     <None Remove="Authentification.xaml" />
     <None Remove="PopUp\ActionConfirmation.xaml" />
     <None Remove="PopUp\MembersWindows.xaml" />
+    <None Remove="PopUp\ResetPassword.xaml" />
     <None Remove="PopUp\ResourcesValidation.xaml" />
   </ItemGroup>
   <ItemGroup>
@@ -137,6 +138,9 @@
     <None Update="Assets\blue.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Page Update="PopUp\ResetPassword.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Update="PopUp\ResourcesValidation.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>

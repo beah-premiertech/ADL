@@ -15,14 +15,14 @@
             <ProgressRing x:Name="ProgRing" IsActive="True" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Width="180" Height="180" />
             <Grid x:Name="MainGrid" RowDefinitions="Auto,Auto,Auto,*" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
                 <InfoBar x:Name="WarningMessage" Title="Search result" Severity="Warning" IsOpen="False" />
-                <StackPanel Grid.Row="1" Orientation="Horizontal" Padding="2,5">
-                    <PersonPicture x:Name="UserPicture" Width="35" Height="35" Margin="10,5" ProfilePicture="/Assets/ADL.png"/>
-                    <TextBlock FontWeight="ExtraBold" FontSize="25" Text="Active Directory Light" Margin="5"/>
+                <StackPanel Margin="0,10,0,2" Grid.Row="1" Orientation="Horizontal" Padding="1">
+                    <PersonPicture Margin="10,0" x:Name="UserPicture" Width="35" Height="35" ProfilePicture="/Assets/ADL.png"/>
+                    <TextBlock FontWeight="ExtraBold" FontSize="25" Text="Active Directory Light" />
                 </StackPanel>
                 <StackPanel Grid.Row="2">
                     <Grid Grid.ColumnDefinitions="*,Auto">
-                        <TextBox x:Name="SearchBox" Margin="10,15" PlaceholderText="Search" KeyDown="TextBox_KeyDown" />
-                        <Button x:Name="SearchBt" Margin="10" Grid.Column="1" Click="Search_Click">
+                        <TextBox Padding="10,5,6,0" x:Name="SearchBox" Margin="10,8,0,10" PlaceholderText="Search" KeyDown="TextBox_KeyDown" />
+                        <Button x:Name="SearchBt" Margin="7" Grid.Column="1" Click="Search_Click">
                             <FontIcon Glyph="&#xE721;" />
                         </Button>
                     </Grid>
@@ -62,19 +62,14 @@
                             <x:String>Enabled</x:String>
                             <x:String>Disabled</x:String>
                         </ComboBox>
-                        <ComboBox x:Name="DomainFilter" MinWidth="160" Header="Filter on domain:" Margin="5,0" SelectedIndex="0" SelectionChanged="DomainFilter_SelectionChanged">
-                            <x:String>All Domains</x:String>
-                            <x:String>na.premiertech.com</x:String>
-                            <x:String>eu.premiertech.com</x:String>
-                            <x:String>as.premiertech.com</x:String>
-                        </ComboBox>
+                        <ComboBox x:Name="DomainFilter" MinWidth="160" Header="Filter on domain:" Margin="5,0" SelectedIndex="0" SelectionChanged="DomainFilter_SelectionChanged"/>
                         <Button Margin="10,0" HorizontalAlignment="Right" x:Name="Refresh" Click="Refresh_Click">
                             <FontIcon Glyph="&#xE72C;" />
                         </Button>
                     </StackPanel>
                     <Grid Margin="10" BorderThickness="1"/>
                 </StackPanel>
-                <SplitView x:Name="SplPane" Grid.Row="3" DisplayMode="CompactInline" IsPaneOpen="True" CompactPaneLength="66" OpenPaneLength="272" PaneBackground="Transparent">
+                <SplitView x:Name="SplPane" Grid.Row="3" DisplayMode="CompactInline" IsPaneOpen="True" CompactPaneLength="60" OpenPaneLength="280" PaneBackground="Transparent">
                     <SplitView.Pane>
                         <Grid HorizontalAlignment="Stretch" Padding="2">
                             <Grid.RowDefinitions>
@@ -89,7 +84,7 @@
                                             <TreeViewItem.ContextFlyout>
                                                 <MenuFlyout>
                                                     <MenuFlyoutItem x:Name="Fav" Text="{x:Bind TypeColor}" Visibility="{x:Bind Type}" Click="Fav_Click">
-                                                        <MenuFlyoutItem.Icon >
+                                                        <MenuFlyoutItem.Icon>
                                                             <FontIcon Glyph="{x:Bind Tag}"/>
                                                         </MenuFlyoutItem.Icon>
                                                     </MenuFlyoutItem>
@@ -136,7 +131,7 @@
                                                         <FontIcon Glyph="{Binding EnableIcon}" />
                                                     </MenuFlyoutItem.Icon>
                                                 </MenuFlyoutItem>
-                                                <MenuFlyoutItem x:Name="ResetPassword" Text="Reset password" Visibility="{Binding ResetPasswordVisibility}" IsEnabled="False" Click="ContextMenuItem_Click">
+                                                <MenuFlyoutItem x:Name="ResetPassword" Text="Reset password" Visibility="{Binding ResetPasswordVisibility}" Click="ContextMenuItem_Click">
                                                     <MenuFlyoutItem.Icon>
                                                         <FontIcon Glyph="&#xE755;" />
                                                     </MenuFlyoutItem.Icon>
@@ -148,7 +143,7 @@
                                                 </MenuFlyoutItem>
                                                 <MenuFlyoutItem x:Name="Members" Text="Members" Visibility="{Binding MembersVisibility}" Click="ContextMenuItem_Click">
                                                     <MenuFlyoutItem.Icon>
-                                                        <FontIcon Glyph="&#xE74D;" />
+                                                        <FontIcon Glyph="&#xE902;" />
                                                     </MenuFlyoutItem.Icon>
                                                 </MenuFlyoutItem>
                                             </MenuFlyout>

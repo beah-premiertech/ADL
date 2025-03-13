@@ -59,7 +59,12 @@ public static class AdManager
     {
         ReadyCount = 0;
         AdObjects.Clear();
-        
+        DevicesResult.Clear();
+        UsersResult.Clear();
+        GroupsResult.Clear();
+        AdOus.Clear();
+        AdRawOus.Clear();
+
         await GetAllOus(UserDomain, Password);
         new Thread(() => { GetAllOus(); }).Start();
 
@@ -120,7 +125,7 @@ public static class AdManager
                     break;
                 }
             }
-     
+
             if (ps.HadErrors)
             {
                 foreach (var error in ps.Streams.Error)
@@ -155,7 +160,8 @@ public static class AdManager
                 {
                     ps.Commands.Clear();
                     ps.AddCommand("Get-ADComputer")
-                      .AddParameter("Filter", "DistinguishedName -notlike \"Domain Control\"")
+                      .AddParameter("Filter", "OperatingSystem -notlike \"*Server*\"")
+                      .AddParameter("Property", "OperatingSystem")
                       .AddParameter("Server", Domain)
                       .AddParameter("Credential", credentials);
 
@@ -214,7 +220,7 @@ public static class AdManager
             }).Start();
         }
     }
-    
+
     private static async Task GetAllUsersAsync(string UserDomain, string Password)
     {
         try
@@ -414,7 +420,7 @@ public static class AdManager
                     AdOU.Children.Add(new AdOu { Name = Domain, Domain = Domain, Path = Domain, FullPath = $"DC={Domain.Replace(".", ",DC=")}", TypeIcon = "\uE774", Type = "Collapsed" });
                     ps.Commands.Clear();
                     ps.AddCommand("Get-ADOrganizationalUnit")
-                      .AddParameter("Filter", "DistinguishedName -notlike \"Domain Control\"")
+                      .AddParameter("Filter", "Name -ne 'Domain Controllers'")
                       .AddParameter("Server", Domain)
                       .AddParameter("Credential", credentials);
 
@@ -436,7 +442,9 @@ public static class AdManager
                             Type = "Visible",
                             Domain = FormatedPath.Split('\\').Last(),
                             FullPath = result.Properties["DistinguishedName"]?.Value?.ToString(),
-                            TypeIcon = "\uE8B7"
+                            Tag = "\uE710",
+                            TypeIcon = "\uE8B7",
+                            TypeColor = "Add to favorites"
                         };
                         AdRawOus.Add(ou);
                     }
@@ -468,9 +476,9 @@ public static class AdManager
                 Domain = ou.Domain,
                 FullPath = ou.FullPath,
                 TypeIcon = ou.TypeIcon,
-                Tag = "\uE710",
+                Tag = ou.Tag,
                 Type = ou.Type,
-                TypeColor = "Add to favorites"
+                TypeColor = ou.TypeColor
             };
             var Parent = AdOU.Children.Find(x => x.Domain.ToLower().Replace(" ", string.Empty) == ou.Domain.ToLower().Replace(" ", string.Empty));
             if (Parent != null)
@@ -484,6 +492,7 @@ public static class AdManager
         AdOus.Add(new AdOu { Name = "Favorites", Domain = "Favorites", FullPath = "Favorites", Path = "Favorites", TypeIcon = "\uE734", Type = "Collapsed" });
         OuReady.Invoke(null, null);
     }
+
     private static void AppendOu(AdOu Parent, string[] PathArray, AdOu AdOu)
     {
         if (PathArray.Length == 1)
@@ -639,6 +648,7 @@ public static class AdManager
             Debug.WriteLine($"Exception in GetAllDevices: {ex.Message}");
         }
     }
+
     public static void AddRemoveMembers(string UserDomain, string Password, AdObject Object, string ResourcePath, bool Remove = false)
     {
         try
@@ -684,7 +694,6 @@ public static class AdManager
             Debug.WriteLine($"Exception in GetAllDevices: {ex.Message}");
         }
     }
-
     public static List<AdBaseObject> Members(string UserDomain, string Password, AdObject Object)
     {
         List<AdBaseObject> Members = new List<AdBaseObject>();
@@ -707,53 +716,113 @@ public static class AdManager
                 var credentials = new PSCredential(UserDomain, ToSecureString(Password));
 
 
-                    ps.Commands.Clear();
-                    ps.AddCommand("Get-ADGroupMember")
-                      .AddParameter("Identity", Object.FullPath)
-                      .AddParameter("Server", Object.Domain)
-                      .AddParameter("Credential", credentials);
+                ps.Commands.Clear();
+                ps.AddCommand("Get-ADGroupMember")
+                  .AddParameter("Identity", Object.FullPath)
+                  .AddParameter("Server", Object.Domain)
+                  .AddParameter("Credential", credentials);
 
-                    var results = ps.Invoke();
+                var results = ps.Invoke();
 
-                    foreach (var result in results)
+                foreach (var result in results)
+                {
+                    var AdName = result.Properties["Name"]?.Value?.ToString();
+                    var PartialFormating = result.Properties["DistinguishedName"]?.Value?.ToString().Replace(",", @"\").Replace("CN=", string.Empty).Substring(AdName.Length + 1).Replace("OU=", string.Empty);
+                    var RawDomain = PartialFormating.Replace(PartialFormating.Split(@"\DC=").First(), string.Empty);
+                    RawDomain = RawDomain.Substring(4);
+                    PartialFormating = PartialFormating.Split(@"\DC=").First();
+                    var FormatedPath = $@"{PartialFormating}\{RawDomain.Replace(@"\DC=", ".")}";
+
+                    var device = new AdBaseObject
                     {
-                        var AdName = result.Properties["Name"]?.Value?.ToString();
-                        var PartialFormating = result.Properties["DistinguishedName"]?.Value?.ToString().Replace(",", @"\").Replace("CN=", string.Empty).Substring(AdName.Length + 1).Replace("OU=", string.Empty);
-                        var RawDomain = PartialFormating.Replace(PartialFormating.Split(@"\DC=").First(), string.Empty);
-                        RawDomain = RawDomain.Substring(4);
-                        PartialFormating = PartialFormating.Split(@"\DC=").First();
-                        var FormatedPath = $@"{PartialFormating}\{RawDomain.Replace(@"\DC=", ".")}";
-
-                        var device = new AdBaseObject
-                        {
-                            Name = AdName,
-                            Type = result.Properties["objectClass"]?.Value?.ToString(),
-                            Path = FormatedPath,
-                            Domain = FormatedPath.Split('\\').Last(),
-                            FullPath = result.Properties["DistinguishedName"]?.Value?.ToString()
-                        };
+                        Name = AdName,
+                        Type = result.Properties["objectClass"]?.Value?.ToString(),
+                        Path = FormatedPath,
+                        Domain = FormatedPath.Split('\\').Last(),
+                        FullPath = result.Properties["DistinguishedName"]?.Value?.ToString()
+                    };
                     if (device.Type == "user")
                     { device.TypeIcon = "\uE77B"; device.TypeColor = "#29ab85"; }
                     else
                     { device.TypeIcon = "\uEA6C"; device.TypeColor = "#158fd7"; }
 
                     Members.Add(device);
-                    }
+                }
 
-                    if (ps.HadErrors)
+                if (ps.HadErrors)
+                {
+                    foreach (var error in ps.Streams.Error)
                     {
-                        foreach (var error in ps.Streams.Error)
-                        {
-                            Debug.WriteLine($"Error executing PowerShell command: {error}");
-                        }
+                        Debug.WriteLine($"Error executing PowerShell command: {error}");
                     }
                 }
+            }
         }
         catch (Exception ex)
         {
             Debug.WriteLine($"Exception in GetAllDevices: {ex.Message}");
         }
         return Members;
+    }
+
+    public static string ResetPassword(string UserDomain, string Password, AdObject User, string NewPassword, bool ChangeAtNextLogon)
+    {
+        string Status = string.Empty;
+        using (PowerShell ps = PowerShell.Create())
+        {
+            ps.AddScript("Import-Module ActiveDirectory -ErrorAction Stop");
+            ps.Invoke();
+
+            if (ps.HadErrors)
+            {
+                foreach (var error in ps.Streams.Error)
+                {
+                    Debug.WriteLine($"Error importing module: {error}");
+                }
+                return "AD Module Import Error";
+            }
+
+            var credentials = new PSCredential(UserDomain, ToSecureString(Password));
+
+            ps.Commands.Clear();
+            ps.AddCommand("Set-ADAccountPassword")
+              .AddParameter("Identity", User.FullPath)
+              .AddParameter("Reset", true)
+              .AddParameter("NewPassword", ToSecureString(NewPassword))
+              .AddParameter("Server", User.Domain)
+              .AddParameter("Confirm", false)
+              .AddParameter("Credential", credentials);
+            try
+            {
+                ps.Invoke();
+            }
+            catch (Exception ex)
+            {
+                Status = ex.Message;
+            }
+
+
+
+            if (string.IsNullOrEmpty(Status))
+            {
+                ps.Commands.Clear();
+                ps.AddCommand("Set-ADUser")
+                  .AddParameter("Identity", User.FullPath)
+                  .AddParameter("ChangePasswordAtLogon", ChangeAtNextLogon)
+                  .AddParameter("Server", User.Domain)
+                  .AddParameter("Credential", credentials);
+
+                try
+                {
+                    ps.Invoke();
+                }
+                catch (Exception ex)
+                {
+                    Status = ex.Message;
+                }
+            }
+        }
+        return Status;
     }
     private static void TriguerReadyEvent()
     {

@@ -54,6 +54,9 @@ public sealed partial class MainPage : Page
             _ = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
             {
                 NavigationTree.ItemsSource = AdManager.AdOus;
+                var All_And_Domains = AdManager.Domains.ToList();
+                All_And_Domains.Insert(0, "All Domains");
+                DomainFilter.ItemsSource = All_And_Domains;
 
             });
         }
@@ -332,6 +335,22 @@ public sealed partial class MainPage : Page
                     }
                     break;
 
+                case "ResetPassword":
+                    var SuccessOrCancel = false;
+                    string? LastStatus = null;  
+                    while (SuccessOrCancel != true)
+                    {
+                        var ResetWin = new ResetPassword(DomainUser, Password, HoveredItem, LastStatus);
+                        ResetWin.XamlRoot = this.XamlRoot;
+                        await ResetWin.ShowAsync();
+                        LastStatus = ResetWin.ResetStatus;
+                        if (string.IsNullOrEmpty(LastStatus))
+                        {
+                            SuccessOrCancel = true;
+                        }
+                    }
+                    break;
+
                 case "Delete":
                     if (HoveredItem != null)
                     {
@@ -367,6 +386,9 @@ public sealed partial class MainPage : Page
         }
     }
 
+    #endregion
+
+    #region Favorites management
     private void NavigationTree_ItemInvoked(TreeView sender, TreeViewItemInvokedEventArgs args)
     {
         if (args.InvokedItem is AdOu OU)
@@ -404,7 +426,7 @@ public sealed partial class MainPage : Page
                 }
                 else
                 {
-                    var Copy = new AdOu { Name = FavItem.Name, Path = FavItem.Path, Domain = FavItem.Domain, FullPath = FavItem.FullPath, TypeIcon = "\uE734", Type = "Visible",TypeColor = "Remove", Tag = "\uECC9" };
+                    var Copy = new AdOu { Name = FavItem.Name, Path = FavItem.Path, Domain = FavItem.Domain, FullPath = FavItem.FullPath, TypeIcon = "\uE734", Type = "Visible", TypeColor = "Remove", Tag = "\uECC9" };
                     AdManager.AdOus.Find(ou => ou.FullPath == "Favorites").Children.Add(Copy);
                 }
                 SaveFavNodeChildren();
@@ -422,7 +444,6 @@ public sealed partial class MainPage : Page
             NavigationTree.ItemsSource = AdManager.AdOus;
         }
     }
-
     private void LoadFavNodeChildren()
     {
         if (ApplicationData.Current.LocalSettings.Values.ContainsKey("FavNodeKey"))
@@ -438,5 +459,6 @@ public sealed partial class MainPage : Page
             }
         }
     }
+
     #endregion
 }
