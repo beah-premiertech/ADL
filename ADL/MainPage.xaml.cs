@@ -20,7 +20,6 @@ public sealed partial class MainPage : Page
     #region Data mangagement and filtering
     private async void Page_Loaded(object sender, RoutedEventArgs e)
     {
-        App.LaunchArguments = new string[] { "na.premiertech.com" };
         if (App.LaunchArguments != null && App.LaunchArguments.Length > 0)
         {
             AdDataCollections.Domains = App.LaunchArguments;

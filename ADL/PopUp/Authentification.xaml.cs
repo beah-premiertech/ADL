@@ -119,7 +119,7 @@ namespace ADL
             if (LocalSettings != null)
             {
                 LocalSettings.Values[UserDomainKey] = userDomain;
-                LocalSettings.Values[$"{UserDomainKey}Index"] = Domain.SelectedIndex;
+                LocalSettings.Values[$"{UserDomainKey}Index"] = Domain.SelectedIndex.ToString();
             }
         }
 
@@ -141,6 +141,22 @@ namespace ADL
             {
                 // Log or handle the exception as needed
                 Debug.WriteLine($"Error accessing local settings: {ex.Message}");
+            }
+        }
+
+        private void Pwd_KeyDown(object sender, KeyRoutedEventArgs e)
+        {
+            if (IsSecondaryButtonEnabled && e.Key == Windows.System.VirtualKey.Enter)
+            {
+                this.Closed += (sender, args) =>
+                {
+                    if (args.Result == ContentDialogResult.Secondary)
+                    {
+                    }
+                };
+
+                TryConnect(this, null);
+                this.Hide();
             }
         }
     }

@@ -30,7 +30,7 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <PasswordBox x:Name="Pwd" PlaceholderText="Password" MinWidth="120" Margin="10" Grid.Column="0" PasswordChanged="Pwd_PasswordChanged"/>
+                <PasswordBox x:Name="Pwd" PlaceholderText="Password" MinWidth="120" Margin="10" Grid.Column="0" PasswordChanged="Pwd_PasswordChanged" KeyDown="Pwd_KeyDown"/>
             </Grid>
         </StackPanel>
     </Grid>
