@@ -394,18 +394,21 @@ public static class AdDataCollections
                     var AdName = result.Properties["Name"]?.Value?.ToString();
                     var FormatedPath = AdCommon.FormatPath(result.Properties["DistinguishedName"]?.Value?.ToString(),AdName);
 
-                    var ou = new AdBaseObject
+                    var group = new AdObject
                     {
                         Name = AdName,
                         Path = FormatedPath,
-                        Type = "Visible",
                         Domain = FormatedPath.Split('\\').First(),
-                        FullPath = result.Properties["DistinguishedName"]?.Value?.ToString(),
-                        Tag = "\uE710",
-                        TypeIcon = "\uE8B7",
-                        TypeColor = "Add to favorites"
+                        Type = "Group",
+                        TypeIcon = "\uE902",
+                        TypeColor = "#9250eb",
+                        DeleteVisibility = "Collapsed",
+                        ResetPasswordVisibility = "Collapsed",
+                        MembersVisibility = "Visible",
+                        CanBeEnable = false,
+                        FullPath = result.Properties["DistinguishedName"]?.Value?.ToString()
                     };
-                    AdRawOus.Add(ou);
+                    AdObjects.Add(group);
                 }
                 ReadyCount++;
                 TriguerReadyEvent();
@@ -468,7 +471,7 @@ public static class AdDataCollections
                 TypeColor = "Add to favorites",
                 Tag = "\uE710"
             };
-            if (child.Name.Length > 2)
+            if (child.Name.Length > 1)
             {
                 parent.Children.Add(child);
             }

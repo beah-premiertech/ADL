@@ -40,8 +40,8 @@
       Mvvm;
       ThemeService;
     </UnoFeatures>
-    <AssemblyVersion>25.3.13.63</AssemblyVersion>
-    <FileVersion>25.3.13.63</FileVersion>
+    <AssemblyVersion>25.3.13.67</AssemblyVersion>
+    <FileVersion>25.3.13.67</FileVersion>
     <PackageCertificateThumbprint>5667DBD5F699C0F4A08C2B88D98FE54DE6642E5E</PackageCertificateThumbprint>
     <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
     <Platforms>AnyCPU;x64</Platforms>
