@@ -1,6 +1,7 @@
 namespace ADL;
 
 using System.Diagnostics;
+using ADL.Class;
 using ADL.PopUp;
 using Microsoft.UI.Xaml.Input;
 using Newtonsoft.Json;
@@ -19,9 +20,9 @@ public sealed partial class MainPage : Page
     #region Data mangagement and filtering
     private async void Page_Loaded(object sender, RoutedEventArgs e)
     {
-        AdManager.GetDomains();
+        AdDataCollections.GetDomains();
         // Await the asynchronous method call
-        AdManager.OnReady += (s, e) =>
+        AdDataCollections.OnReady += (s, e) =>
         {
             if (Dispatcher != null)
             {
@@ -41,7 +42,7 @@ public sealed partial class MainPage : Page
                 Refresh.IsEnabled = true;
             }
         };
-        AdManager.OuReady += AdManager_OuReady;
+        AdDataCollections.OuReady += AdManager_OuReady;
 
         await Authentificate();
         LoadData();
@@ -53,8 +54,8 @@ public sealed partial class MainPage : Page
         {
             _ = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
             {
-                NavigationTree.ItemsSource = AdManager.AdOus;
-                var All_And_Domains = AdManager.Domains.ToList();
+                NavigationTree.ItemsSource = AdDataCollections.AdOus;
+                var All_And_Domains = AdDataCollections.Domains.ToList();
                 All_And_Domains.Insert(0, "All Domains");
                 DomainFilter.ItemsSource = All_And_Domains;
 
@@ -94,7 +95,7 @@ public sealed partial class MainPage : Page
         Refresh.IsEnabled = false;
         ProgRing.Visibility = Visibility.Visible;
         MainGrid.Visibility = Visibility.Collapsed;
-        new Thread(() => AdManager.GetAllDataAsync(DomainUser, Password)).Start();
+        new Thread(() => AdDataCollections.GetAllDataAsync(DomainUser, Password)).Start();
     }
     private void Search(bool ShowWarning = false)
     {
@@ -104,13 +105,13 @@ public sealed partial class MainPage : Page
         switch (SearchBy.SelectedIndex)
         {
             case 0:
-                ByFilter = AdManager.AdObjects.Where(obj => obj.Name.ToLower().Contains(SearchBox.Text.ToLower())).ToList();
+                ByFilter = AdDataCollections.AdObjects.Where(obj => obj.Name.ToLower().Contains(SearchBox.Text.ToLower())).ToList();
                 break;
             case 1:
-                ByFilter = AdManager.AdObjects.Where(obj => obj.Path.ToLower().Contains(SearchBox.Text.ToLower())).ToList();
+                ByFilter = AdDataCollections.AdObjects.Where(obj => obj.Path.ToLower().Contains(SearchBox.Text.ToLower())).ToList();
                 break;
             case 2:
-                ByFilter = AdManager.AdObjects.Where(obj => obj.FullPath.ToLower().Contains(SearchBox.Text.ToLower())).ToList();
+                ByFilter = AdDataCollections.AdObjects.Where(obj => obj.FullPath.ToLower().Contains(SearchBox.Text.ToLower())).ToList();
                 break;
         }
 
@@ -321,14 +322,14 @@ public sealed partial class MainPage : Page
                                 var Confirmation = new ActionConfirmation($"Do you want to disable {HoveredItem.Name}", "\uECC9");
                                 Confirmation.XamlRoot = this.XamlRoot;
                                 if (await Confirmation.ShowAsync() == ContentDialogResult.Secondary)
-                                    AdManager.Disable(DomainUser, Password, HoveredItem);
+                                    AdAction.Disable(DomainUser, Password, HoveredItem);
                             }
                             else
                             {
                                 var Confirmation = new ActionConfirmation($"Do you want to enable {HoveredItem.Name}", "\uE930");
                                 Confirmation.XamlRoot = this.XamlRoot;
                                 if (await Confirmation.ShowAsync() == ContentDialogResult.Secondary)
-                                    AdManager.Enable(DomainUser, Password, HoveredItem);
+                                    AdAction.Enable(DomainUser, Password, HoveredItem);
                             }
                         }
                         Search();
@@ -357,7 +358,7 @@ public sealed partial class MainPage : Page
                         var Confirmation = new ActionConfirmation($"Do you want to delete {HoveredItem.Name}", "\uE74D");
                         Confirmation.XamlRoot = this.XamlRoot;
                         if (await Confirmation.ShowAsync() == ContentDialogResult.Secondary)
-                            AdManager.Delete(DomainUser, Password, HoveredItem);
+                            AdAction.Delete(DomainUser, Password, HoveredItem);
                         Search();
                     }
                     break;
@@ -414,12 +415,11 @@ public sealed partial class MainPage : Page
     }
     private void Fav_Click(object sender, RoutedEventArgs e)
     {
-
         if (sender is MenuFlyoutItem TreeItem && TreeItem.DataContext is AdOu FavItem)
         {
             if (FavItem != null)
             {
-                var FavNode = AdManager.AdOus.Find(ou => ou.FullPath == "Favorites");
+                var FavNode = AdDataCollections.AdOus.Find(ou => ou.FullPath == "Favorites");
                 if (FavItem.TypeColor.ToLower() == "remove")
                 {
                     FavNode.Children.Remove(FavNode.Children.Find(ou => ou.FullPath == FavItem.FullPath));
@@ -427,7 +427,7 @@ public sealed partial class MainPage : Page
                 else
                 {
                     var Copy = new AdOu { Name = FavItem.Name, Path = FavItem.Path, Domain = FavItem.Domain, FullPath = FavItem.FullPath, TypeIcon = "\uE734", Type = "Visible", TypeColor = "Remove", Tag = "\uECC9" };
-                    AdManager.AdOus.Find(ou => ou.FullPath == "Favorites").Children.Add(Copy);
+                    AdDataCollections.AdOus.Find(ou => ou.FullPath == "Favorites").Children.Add(Copy);
                 }
                 SaveFavNodeChildren();
             }
@@ -435,13 +435,13 @@ public sealed partial class MainPage : Page
     }
     private void SaveFavNodeChildren()
     {
-        var favNode = AdManager.AdOus.Find(ou => ou.FullPath == "Favorites");
+        var favNode = AdDataCollections.AdOus.Find(ou => ou.FullPath == "Favorites");
         if (favNode != null)
         {
             var json = JsonConvert.SerializeObject(favNode.Children);
             ApplicationData.Current.LocalSettings.Values["FavNodeKey"] = json;
             NavigationTree.ItemsSource = null;
-            NavigationTree.ItemsSource = AdManager.AdOus;
+            NavigationTree.ItemsSource = AdDataCollections.AdOus;
         }
     }
     private void LoadFavNodeChildren()
@@ -450,15 +450,41 @@ public sealed partial class MainPage : Page
         {
             string json = ApplicationData.Current.LocalSettings.Values["FavNodeKey"] as string ?? "{}";
             var favNodeChildren = JsonConvert.DeserializeObject<List<AdOu>>(json);
-            var favNode = AdManager.AdOus.Find(ou => ou.FullPath == "Favorites");
+            var favNode = AdDataCollections.AdOus.Find(ou => ou.FullPath == "Favorites");
             if (favNode != null && favNodeChildren != null)
             {
                 favNode.Children = favNodeChildren;
                 NavigationTree.ItemsSource = null;
-                NavigationTree.ItemsSource = AdManager.AdOus;
+                NavigationTree.ItemsSource = AdDataCollections.AdOus;
             }
         }
     }
 
     #endregion
+
+    private async void AddDevice_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is MenuFlyoutItem TreeItem && TreeItem.DataContext is AdOu AddItem)
+        {
+            if (AddItem != null)
+            {
+                var AddWin = new AddDevice(DomainUser, Password, AddItem);
+                AddWin.XamlRoot = this.XamlRoot;
+                await AddWin.ShowAsync();
+                if (!string.IsNullOrEmpty(AddWin.Result))
+                {
+                    WarningMessage.IsOpen = true;
+                    WarningMessage.Message = AddWin.Result;
+                    WarningMessage.Severity = InfoBarSeverity.Error;
+                    WarningMessage.Title = "Add device error";
+                }
+                else
+                {
+                    var RealDevicePath = $"CN={AddWin.NewName},{AddWin.Path}";
+                    AdDataCollections.AdObjects.Add(new AdObject { Name = AddWin.NewName, Path = AdCommon.FormatPath(RealDevicePath, AddWin.NewName), FullPath = RealDevicePath, Type = "Device", TypeIcon = "\uEA6C", DeleteVisibility = "Visible", ResetPasswordVisibility = "Collapsed", MembersVisibility = "Collapsed", TypeColor = "#158fd7", IsEnable = true, CanBeEnable = true });
+                    Search();
+                }
+            }
+        }
+    }
 }

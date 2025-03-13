@@ -83,6 +83,11 @@
                                         <TreeViewItem ItemsSource="{x:Bind Children}">
                                             <TreeViewItem.ContextFlyout>
                                                 <MenuFlyout>
+                                                    <MenuFlyoutItem x:Name="AddDevice" Text="Add device" Visibility="{x:Bind Type}" Click="AddDevice_Click">
+                                                        <MenuFlyoutItem.Icon>
+                                                            <FontIcon Glyph="&#xE836;"/>
+                                                        </MenuFlyoutItem.Icon>
+                                                    </MenuFlyoutItem>
                                                     <MenuFlyoutItem x:Name="Fav" Text="{x:Bind TypeColor}" Visibility="{x:Bind Type}" Click="Fav_Click">
                                                         <MenuFlyoutItem.Icon>
                                                             <FontIcon Glyph="{x:Bind Tag}"/>

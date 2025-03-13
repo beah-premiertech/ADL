@@ -12,6 +12,7 @@ using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
+using ADL.Class;
 
 namespace ADL.PopUp
 {
@@ -44,7 +45,7 @@ namespace ADL.PopUp
 		{
             if (User != null && Pwd.Password != null && Pwd.Password.Length > 3)
             {
-                ResetStatus = AdManager.ResetPassword(UserDomain, Password, User, Pwd.Password, ChangeOnNext.IsChecked ?? false);
+                ResetStatus = AdAction.ResetPassword(UserDomain, Password, User, Pwd.Password, ChangeOnNext.IsChecked ?? false);
             }
 
         }

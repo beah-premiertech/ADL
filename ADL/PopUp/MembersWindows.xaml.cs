@@ -14,6 +14,7 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using System.Text.RegularExpressions;
 using Windows.ApplicationModel.DataTransfer;
+using ADL.Class;
 
 namespace ADL.PopUp;
 
@@ -31,7 +32,7 @@ public sealed partial class MembersWindows : Window
         DomainUser = DU;
         Password = P;
         TitleText.Text = $"Members of {Group.Name}";
-        DeviceListView.ItemsSource = AdManager.Members(DomainUser, Password, Group);
+        DeviceListView.ItemsSource = AdAction.Members(DomainUser, Password, Group);
     }
 
     private void Grid_PointerEntered(object sender, PointerRoutedEventArgs e)
@@ -56,8 +57,8 @@ public sealed partial class MembersWindows : Window
                         Confirmation.XamlRoot = this.Content.XamlRoot;
                         if (await Confirmation.ShowAsync() == ContentDialogResult.Secondary)
                         {
-                            AdManager.AddRemoveMembers(DomainUser, Password, Group, WorkItem.FullPath, true);
-                            DeviceListView.ItemsSource = AdManager.Members(DomainUser, Password, Group);
+                            AdAction.AddRemoveMembers(DomainUser, Password, Group, WorkItem.FullPath, true);
+                            DeviceListView.ItemsSource = AdAction.Members(DomainUser, Password, Group);
                         }
                     }
                     break;
@@ -83,7 +84,7 @@ public sealed partial class MembersWindows : Window
 
     private async void CheckName_Click(object sender, RoutedEventArgs e)
     {
-        var CheckRes = new ResourcesValidation(AdManager.AdObjects.Where(obj => obj.Type != "Group" && obj.Name.ToLower().Contains(SearchText.Text.ToLower())).ToList());
+        var CheckRes = new ResourcesValidation(AdDataCollections.AdObjects.Where(obj => obj.Type != "Group" && obj.Name.ToLower().Contains(SearchText.Text.ToLower())).ToList());
         CheckRes.XamlRoot = this.Content.XamlRoot;
         await CheckRes.ShowAsync();
         if (CheckRes.Resource != null)
@@ -102,8 +103,8 @@ public sealed partial class MembersWindows : Window
             Confirmation.XamlRoot = this.Content.XamlRoot;
             if (await Confirmation.ShowAsync() == ContentDialogResult.Secondary)
             {
-                AdManager.AddRemoveMembers(DomainUser, Password, Group, WorkItem.FullPath);
-                DeviceListView.ItemsSource = AdManager.Members(DomainUser, Password, Group);
+                AdAction.AddRemoveMembers(DomainUser, Password, Group, WorkItem.FullPath);
+                DeviceListView.ItemsSource = AdAction.Members(DomainUser, Password, Group);
             }
         }
     }

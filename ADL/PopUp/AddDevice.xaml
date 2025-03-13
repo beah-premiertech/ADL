@@ -1,0 +1,22 @@
+﻿<ContentDialog
+    x:Class="ADL.PopUp.AddDevice"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:ADL.PopUp"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="Add device to OU_NAME"
+    Style="{ThemeResource DefaultContentDialogStyle}"
+    PrimaryButtonText="Cancel"
+    SecondaryButtonText="Add"
+    IsSecondaryButtonEnabled="False"
+    PrimaryButtonClick="ContentDialog_PrimaryButtonClick"
+    SecondaryButtonClick="ContentDialog_SecondaryButtonClick">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <TextBox x:Name="DeviceName" PlaceholderText="Device name" Margin="10" Grid.Row="0" TextChanged="DeviceName_TextChanged"/>
+        <TextBox x:Name="DevicePath" IsReadOnly="True" Margin="10" Grid.Row="1"/>
+    </Grid>
+</ContentDialog>

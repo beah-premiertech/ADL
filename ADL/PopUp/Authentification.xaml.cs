@@ -14,6 +14,7 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using System.DirectoryServices.AccountManagement;
 using System.Diagnostics;
+using ADL.Class;
 
 namespace ADL
 {
@@ -28,7 +29,7 @@ namespace ADL
         public Authentification(InfoBarSeverity s = InfoBarSeverity.Informational, string? t = null, string? m = null)
         {
             this.InitializeComponent();
-            Domain.ItemsSource = AdManager.NtDomains;
+            Domain.ItemsSource = AdDataCollections.NtDomains;
             try
             {
                 if (ApplicationData.Current != null && ApplicationData.Current.LocalSettings != null && ApplicationData.Current.LocalSettings.Values != null)

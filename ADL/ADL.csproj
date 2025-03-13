@@ -113,6 +113,7 @@
     <None Remove="Assets\Pkg\WideTile.scale-400.png" />
     <None Remove="Authentification.xaml" />
     <None Remove="PopUp\ActionConfirmation.xaml" />
+    <None Remove="PopUp\AddDevice.xaml" />
     <None Remove="PopUp\MembersWindows.xaml" />
     <None Remove="PopUp\ResetPassword.xaml" />
     <None Remove="PopUp\ResourcesValidation.xaml" />
@@ -138,6 +139,9 @@
     <None Update="Assets\blue.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Page Update="PopUp\AddDevice.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Update="PopUp\ResetPassword.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
