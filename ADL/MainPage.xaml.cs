@@ -6,6 +6,7 @@ using ADL.PopUp;
 using Microsoft.UI.Xaml.Input;
 using Newtonsoft.Json;
 using Windows.ApplicationModel.DataTransfer;
+using static ADL.Program;
 
 public sealed partial class MainPage : Page
 {
@@ -20,9 +21,9 @@ public sealed partial class MainPage : Page
     #region Data mangagement and filtering
     private async void Page_Loaded(object sender, RoutedEventArgs e)
     {
-        if (App.LaunchArguments != null && App.LaunchArguments.Length > 0)
+        if (ArgsHelper.Args != null && ArgsHelper.Args.Length > 0)
         {
-            AdDataCollections.Domains = App.LaunchArguments;
+            AdDataCollections.Domains = ArgsHelper.Args;
         }
         AdDataCollections.GetDomains();
 
@@ -125,8 +126,9 @@ public sealed partial class MainPage : Page
         if (PathFilter != null)
             FinalFilter = FinalFilter.Where(obj => obj.FullPath.ToLower().Contains(PathFilter?.ToLower() ?? "N/A")).ToList();
 
-        if (FinalFilter.Count < 600)
+        if (FinalFilter.Count < 500)
         {
+            DeviceListView.ItemsSource = null;
             WarningMessage.IsOpen = false;
             switch (TypeFilter.SelectedIndex)
             {
@@ -340,7 +342,21 @@ public sealed partial class MainPage : Page
                         Search();
                     }
                     break;
-
+                case "Move":
+                    if (HoveredItem != null)
+                    {
+                        var MoveWin = new BrowseOus();
+                        MoveWin.XamlRoot = this.XamlRoot;
+                        await MoveWin.ShowAsync();
+                        if (MoveWin.SelectedOu != null)
+                        {
+                            AdAction.Move(DomainUser, Password, HoveredItem, MoveWin.SelectedOu.FullPath);
+                            HoveredItem.Path = $@"{AdCommon.FormatPath(MoveWin.SelectedOu.FullPath,MoveWin.SelectedOu.Name)}";
+                            HoveredItem.FullPath = $"CN={HoveredItem.Name}.{MoveWin.SelectedOu.FullPath}";
+                            Search();
+                        }
+                    }
+                    break;
                 case "ResetPassword":
                     var SuccessOrCancel = false;
                     string? LastStatus = null;  
@@ -409,7 +425,6 @@ public sealed partial class MainPage : Page
             }
             else
             {
-                Debug.WriteLine($"NAME={OU.Name} PATH={OU.Path} FULLPATH={OU.FullPath}");
                 DomainFilter.IsEnabled = false;
                 DomainFilter.SelectedIndex = 0;
                 SearchBy.IsEnabled = false;
@@ -487,7 +502,7 @@ public sealed partial class MainPage : Page
                 else
                 {
                     var RealDevicePath = $"CN={AddWin.NewName},{AddWin.Path}";
-                    AdDataCollections.AdObjects.Add(new AdObject { Name = AddWin.NewName, Path = AdCommon.FormatPath(RealDevicePath, AddWin.NewName), FullPath = RealDevicePath, Type = "Device", TypeIcon = "\uEA6C", DeleteVisibility = "Visible", ResetPasswordVisibility = "Collapsed", MembersVisibility = "Collapsed", TypeColor = "#158fd7", IsEnable = true, CanBeEnable = true });
+                    AdDataCollections.AdObjects.Add(new AdObject { Name = AddWin.NewName, Domain = AddItem.Domain, Path = AdCommon.FormatPath(RealDevicePath, AddWin.NewName), FullPath = RealDevicePath, Type = "Device", TypeIcon = "\uEA6C", DeleteVisibility = "Visible", ResetPasswordVisibility = "Collapsed", MembersVisibility = "Collapsed", TypeColor = "#158fd7", IsEnable = true, CanBeEnable = true });
                     Search();
                 }
             }

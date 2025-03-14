@@ -142,6 +142,35 @@ public static class AdAction
             Debug.WriteLine($"Exception in GetAllDevices: {ex.Message}");
         }
     }
+    public static void Move(string UserDomain, string Password, AdObject Object, string Destination)
+    {
+        var BaseObject = AdDataCollections.AdObjects.Find(x => x.Name == Object.Name);
+        try
+        {
+            using (PowerShell ps = PowerShell.Create())
+            {
+                ps.AddScript("Import-Module ActiveDirectory -ErrorAction Stop");
+                ps.Invoke();
+                if (ps.HadErrors)
+                {
+                    foreach (var error in ps.Streams.Error)
+                    {
+                        Debug.WriteLine($"Error importing module: {error}");
+                    }
+                    return;
+                }
+                var credentials = new PSCredential(UserDomain, AdCommon.ToSecureString(Password));
+                ps.Commands.Clear();
+                ps.AddCommand("Move-ADObject")
+                  .AddParameter("Identity", BaseObject.FullPath)
+                  .AddParameter("TargetPath", Destination)
+                  .AddParameter("Server", BaseObject.Domain)
+                  .AddParameter("Credential", credentials);
+                ps.Invoke();
+            }
+        }
+        catch { }
+    }
     #endregion
 
     #region Devices management

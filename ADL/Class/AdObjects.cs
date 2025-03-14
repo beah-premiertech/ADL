@@ -34,3 +34,4 @@ public class AdNtDomain
     public string Domain { get; set; }
     public string NTDomain { get; set; }
 }
+public static class ArgsHelper { public static string[]? Args { get; set; } = null; }

@@ -136,6 +136,11 @@
                                                         <FontIcon Glyph="{Binding EnableIcon}" />
                                                     </MenuFlyoutItem.Icon>
                                                 </MenuFlyoutItem>
+                                                <MenuFlyoutItem x:Name="Move" Text="Move" Visibility="{Binding EnableVisibility}" Click="ContextMenuItem_Click">
+                                                    <MenuFlyoutItem.Icon>
+                                                        <FontIcon Glyph="&#xE8DE;" />
+                                                    </MenuFlyoutItem.Icon>
+                                                </MenuFlyoutItem>
                                                 <MenuFlyoutItem x:Name="ResetPassword" Text="Reset password" Visibility="{Binding ResetPasswordVisibility}" Click="ContextMenuItem_Click">
                                                     <MenuFlyoutItem.Icon>
                                                         <FontIcon Glyph="&#xE755;" />

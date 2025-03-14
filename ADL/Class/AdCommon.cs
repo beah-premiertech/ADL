@@ -14,20 +14,28 @@ namespace ADL.Class
             }
             return securePassword;
         }
-        internal static string FormatPath(string Path,string Name)
+        internal static string FormatPath(string Path, string Name)
         {
-            var PartialFormating = Path.Replace(",", @"\").Replace("CN=", string.Empty).Substring(Name.Length + 1).Replace("OU=", string.Empty);
-            var RawDomain = PartialFormating.Replace(PartialFormating.Split(@"\DC=").First(), string.Empty);
-            RawDomain = RawDomain.Substring(4);
-            PartialFormating = PartialFormating.Split(@"\DC=").First();
-            var ArrayPath = $@"{PartialFormating}\{RawDomain.Replace(@"\DC=", ".")}".Split('\\');
-            string FinalPath = string.Empty;
-            foreach (var Part in ArrayPath.Reverse())
-            {
-                FinalPath += $"\\{Part}";
-            }
+            // Replace commas with backslashes and remove "CN="
+            var partialFormatting = Path.Replace(",", @"\").Replace("CN=", string.Empty);
 
-            return FinalPath.Substring(1);
+            // Extract the domain components
+            var domainComponents = partialFormatting.Split(new[] { @"\DC=" }, StringSplitOptions.None);
+            var rawDomain = string.Join(".", domainComponents.Skip(1));
+
+            // Extract the organizational units
+            var organizationalUnits = domainComponents[0].Split(new[] { @"\" }, StringSplitOptions.None)
+                                                         .Where(part => part.StartsWith("OU="))
+                                                         .Select(part => part.Replace("OU=", string.Empty))
+                                                         .ToArray().Reverse();
+
+            // Combine the domain components and organizational units
+            var finalPath = rawDomain + "\\" + string.Join("\\", organizationalUnits);
+
+            return finalPath;
         }
+
+
+
     }
 }

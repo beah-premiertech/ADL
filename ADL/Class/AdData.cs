@@ -279,7 +279,6 @@ public static class AdDataCollections
                     {
                         var AdName = result.Properties["Name"]?.Value?.ToString();
                         var FormatedPath = AdCommon.FormatPath(result.Properties["DistinguishedName"]?.Value?.ToString(), AdName);
-
                         var ou = new AdBaseObject
                         {
                             Name = AdName,
@@ -342,6 +341,7 @@ public static class AdDataCollections
                     };
 
                     AdObjects.Add(device);
+                    Debug.WriteLine($"Device: {device.Name} Domain: {device.Domain}");
                 }
                 ReadyCount++;
                 TriguerReadyEvent();
@@ -465,7 +465,7 @@ public static class AdDataCollections
                 Name = currentNodeName,
                 Path = path,
                 Domain = parent.Domain,
-                FullPath = $"OU={path.Replace("\\",",OU=")},DC={parent.Domain.Replace(".",",DC=")}".Replace($"{parent.Domain},",string.Empty).Replace(",OU=DC=",",DC="),
+                FullPath = $"OU={path.Replace("\\", ",OU=")},DC={parent.Domain.Replace(".", ",DC=")}".Replace($"{parent.Domain},", string.Empty).Replace(",OU=DC=", ",DC="),
                 TypeIcon = "\uE8B7",
                 Type = "Visible",
                 TypeColor = "Add to favorites",
@@ -484,10 +484,15 @@ public static class AdDataCollections
         }
         else
         {
-            // Add the final OU to the child
-            child.Children.Add(adOuToAdd);
+            // Add the final OU to the parent if it doesn't already exist
+            if (!parent.Children.Any(c => c.Name.Equals(adOuToAdd.Name, StringComparison.OrdinalIgnoreCase)))
+            {
+                parent.Children.Add(adOuToAdd);
+            }
         }
     }
+
+
 
     private static void TriguerReadyEvent()
     {

@@ -6,8 +6,9 @@ public class Program
     [STAThread]
     public static void Main(string[] args)
     {
+        ArgsHelper.Args = args;
         var host = SkiaHostBuilder.Create()
-            .App(() => new App(args))
+            .App(() => new App())
             .UseX11()
             .UseLinuxFrameBuffer()
             .UseMacOS()
